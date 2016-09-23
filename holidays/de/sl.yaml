@@ -1,0 +1,23 @@
+---
+
+includes: ["de"]
+
+holidays:
+
+  fixed:
+    - name: "Assumption Day"
+      localized:
+        de: "Mariä Himmelfahrt"
+      month: 8
+      day: 15
+    - name: "All Saints"
+      localized:
+        de: "Allerheiligen"
+      month: 11
+      day: 1
+
+  easter_based:
+    - name: "Corpus Christi"
+      localized:
+        de: "Fronleichnam"
+      difference: +60

@@ -1,0 +1,11 @@
+---
+
+includes: ["de"]
+
+holidays:
+
+  easter_based:
+    - name: "Corpus Christi"
+      localized:
+        de: "Fronleichnam"
+      difference: +60
