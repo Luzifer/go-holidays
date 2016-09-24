@@ -18,11 +18,11 @@ var HolidayDataNotFoundError = errors.New("Holiday data not found for requested 
 // Holiday contains information about an holiday
 type Holiday struct {
 	// Name contains the english representation of the holidays name
-	Name string
+	Name string `json:"name"`
 	// LocalizedName contains a map of localizations of the name, key is a ISO 3166-2 country code without subdivision
-	LocalizedName map[string]string
-	// Date contains the date with time.Local zone
-	Date time.Time
+	LocalizedName map[string]string `json:"localized_name"`
+	// Date contains the date in YYYY-MM-DD notation
+	Date string `json:"date"`
 }
 
 type holidays []Holiday
@@ -50,7 +50,7 @@ func GetHolidays(countryCode string, year int) ([]Holiday, error) {
 			result = append(result, Holiday{
 				Name:          h.Name,
 				LocalizedName: h.LocalizedName,
-				Date:          time.Date(year, time.Month(h.Month), h.Day, 0, 0, 0, 0, time.Local),
+				Date:          time.Date(year, time.Month(h.Month), h.Day, 0, 0, 0, 0, time.Local).Format("2006-01-02"),
 			})
 		}
 
@@ -58,7 +58,7 @@ func GetHolidays(countryCode string, year int) ([]Holiday, error) {
 			result = append(result, Holiday{
 				Name:          h.Name,
 				LocalizedName: h.LocalizedName,
-				Date:          easter.Add(time.Duration(h.Difference) * 24 * time.Hour),
+				Date:          easter.Add(time.Duration(h.Difference) * 24 * time.Hour).Format("2006-01-02"),
 			})
 		}
 
