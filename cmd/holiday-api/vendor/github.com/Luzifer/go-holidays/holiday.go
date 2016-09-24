@@ -28,7 +28,7 @@ type Holiday struct {
 type holidays []Holiday
 
 func (h holidays) Len() int           { return len(h) }
-func (h holidays) Less(i, j int) bool { return h[i].Date.Before(h[j].Date) }
+func (h holidays) Less(i, j int) bool { return h[i].Date < h[j].Date }
 func (h holidays) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
 
 // GetHolidays returns the holidays for the given ISO 3166-2 countryCode and year
