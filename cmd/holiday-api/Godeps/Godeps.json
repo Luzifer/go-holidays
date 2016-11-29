@@ -5,7 +5,7 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/Luzifer/go-holidays",
-			"Rev": "494749a5786c8f8db159d05e8699a22ab3eec030"
+			"Rev": "ba0fe43284501de6dd5e299ddbfd4c0ae6a54c43"
 		},
 		{
 			"ImportPath": "github.com/Luzifer/rconfig",

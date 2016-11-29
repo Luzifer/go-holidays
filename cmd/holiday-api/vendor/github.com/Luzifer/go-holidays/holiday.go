@@ -1,19 +1,26 @@
 package holidays
 
-//go:generate go-bindata -pkg $GOPACKAGE -o holidays_data.go holidays/...
-
 import (
 	"errors"
 	"fmt"
-	"path"
 	"sort"
-	"strings"
 	"time"
-
-	yaml "gopkg.in/yaml.v2"
 )
 
-var HolidayDataNotFoundError = errors.New("Holiday data not found for requested country-code")
+const day = 24 * time.Hour
+
+var (
+	HolidayDataNotFoundError = errors.New("Holiday data not found for requested country-code")
+	holidayProviders         = map[string]holidayDataSource{}
+)
+
+func registerHolidayDataSource(code string, hds holidayDataSource) {
+	if _, ok := holidayProviders[code]; ok {
+		panic(fmt.Errorf("Duplicatei definition for country code %q", code))
+	}
+
+	holidayProviders[code] = hds
+}
 
 // Holiday contains information about an holiday
 type Holiday struct {
@@ -23,46 +30,44 @@ type Holiday struct {
 	LocalizedName map[string]string `json:"localized_name"`
 	// Date contains the date in YYYY-MM-DD notation
 	Date string `json:"date"`
+	// ParsedDate is the Date as a time.Time object
+	ParsedDate time.Time `json:"parsed_date"`
 }
 
-type holidays []Holiday
+func newHoliday(name string, localizedName map[string]string, parsedDate time.Time) Holiday {
+	return Holiday{
+		Name:          name,
+		LocalizedName: localizedName,
+		Date:          parsedDate.Format("2006-01-02"),
+		ParsedDate:    parsedDate,
+	}
+}
 
-func (h holidays) Len() int           { return len(h) }
-func (h holidays) Less(i, j int) bool { return h[i].Date < h[j].Date }
-func (h holidays) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
+func dateFromNumbers(year, month, day int) time.Time {
+	return time.Date(year, time.Month(month), day, 0, 0, 0, 0, time.Local)
+}
+
+type holidayDataSource interface {
+	GetIncludes() []string
+	GetHolidays(year int) []Holiday
+}
 
 // GetHolidays returns the holidays for the given ISO 3166-2 countryCode and year
 func GetHolidays(countryCode string, year int) ([]Holiday, error) {
-	requiredFiles := []string{countryCode}
+	requiredCodes := []string{countryCode}
 	result := []Holiday{}
 
-	for len(requiredFiles) > 0 {
-		hdf, err := loadDataFile(requiredFiles[0])
-		if err != nil {
-			return result, err
+	for len(requiredCodes) > 0 {
+		cc := requiredCodes[0]
+		hds, ok := holidayProviders[cc]
+		if !ok {
+			return nil, HolidayDataNotFoundError
 		}
 
-		requiredFiles = append(requiredFiles, hdf.Includes...)
+		requiredCodes = append(requiredCodes, hds.GetIncludes()...)
+		result = append(result, hds.GetHolidays(year)...)
 
-		easter := GregorianEasterSunday(year)
-
-		for _, h := range hdf.Holidays.Fixed {
-			result = append(result, Holiday{
-				Name:          h.Name,
-				LocalizedName: h.LocalizedName,
-				Date:          time.Date(year, time.Month(h.Month), h.Day, 0, 0, 0, 0, time.Local).Format("2006-01-02"),
-			})
-		}
-
-		for _, h := range hdf.Holidays.EasterBased {
-			result = append(result, Holiday{
-				Name:          h.Name,
-				LocalizedName: h.LocalizedName,
-				Date:          easter.Add(time.Duration(h.Difference) * 24 * time.Hour).Format("2006-01-02"),
-			})
-		}
-
-		requiredFiles = requiredFiles[1:]
+		requiredCodes = requiredCodes[1:]
 	}
 
 	sort.Sort(holidays(result))
@@ -70,34 +75,8 @@ func GetHolidays(countryCode string, year int) ([]Holiday, error) {
 	return result, nil
 }
 
-type holidaysDataFileEntry struct {
-	Name          string            `yaml:"name"`
-	LocalizedName map[string]string `yaml:"localized"`
-	Month         int               `yaml:"month"`
-	Day           int               `yaml:"day"`
-	Difference    int               `yaml:"difference"`
-}
+type holidays []Holiday
 
-type holidaysDataFile struct {
-	Includes []string `yaml:"includes"`
-	Holidays struct {
-		Fixed       []holidaysDataFileEntry `yaml:"fixed"`
-		EasterBased []holidaysDataFileEntry `yaml:"easter_based"`
-	} `yaml:"holidays"`
-}
-
-func loadDataFile(countryCode string) (holidaysDataFile, error) {
-	r := holidaysDataFile{}
-
-	parts := strings.Split(countryCode, "-")
-	if len(parts) == 1 {
-		parts = append(parts, "_")
-	}
-
-	data, err := Asset(fmt.Sprintf(path.Join("holidays", parts[0], parts[1]) + ".yaml"))
-	if err != nil {
-		return r, HolidayDataNotFoundError
-	}
-
-	return r, yaml.Unmarshal(data, &r)
-}
+func (h holidays) Len() int           { return len(h) }
+func (h holidays) Less(i, j int) bool { return h[i].Date < h[j].Date }
+func (h holidays) Swap(i, j int)      { h[i], h[j] = h[j], h[i] }
