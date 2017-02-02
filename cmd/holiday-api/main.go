@@ -44,7 +44,14 @@ func main() {
 	r.HandleFunc("/{country-code:[a-z-]+}/{year:[0-9]{4}}", handleHolidays)
 	r.HandleFunc("/{country-code:[a-z-]+}", handleHolidays)
 	r.HandleFunc("/", handleReadme)
-	http.ListenAndServe(cfg.Listen, r)
+
+	srv := &http.Server{
+		Addr:         cfg.Listen,
+		Handler:      r,
+		ReadTimeout:  time.Second,
+		WriteTimeout: time.Second,
+	}
+	log.Println(srv.ListenAndServe())
 }
 
 func handleHolidays(res http.ResponseWriter, r *http.Request) {
