@@ -1,11 +1,11 @@
 {
 	"ImportPath": "github.com/Luzifer/go-holidays/cmd/holiday-api",
 	"GoVersion": "go1.7",
-	"GodepVersion": "v74",
+	"GodepVersion": "v78",
 	"Deps": [
 		{
 			"ImportPath": "github.com/Luzifer/go-holidays",
-			"Rev": "ba0fe43284501de6dd5e299ddbfd4c0ae6a54c43"
+			"Rev": "025b87d81e0ce8649eeba2d11c9aa75aaf2e0aa3"
 		},
 		{
 			"ImportPath": "github.com/Luzifer/rconfig",
