@@ -12,6 +12,8 @@
           integrity="sha256-ZT4HPpdCOt2lvDkXokHuhJfdOKSPFLzeAJik5U/Q+l4=" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootswatch/3.3.7/superhero/bootstrap.min.css"
           integrity="sha256-LEplvgQTKatd65f2Z/JThrYx/sdoKygi0dsC1h5sInE=" crossorigin="anonymous" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/styles/solarized-dark.min.css"
+          integrity="sha256-90Y+fvi28WF+3jKH4tHEkoQ9WLeFKJjpvCPNOtU9ZvU=" crossorigin="anonymous" />
 
     <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -62,22 +64,22 @@ Each entry consists of four keys:
 
 ```json
 [
-	{
-		name: "New Year's Day",
-		localized_name: {
-			de: "Neujahrstag"
-		},
-		date: "2017-01-01",
-		parsed_date: "2017-01-01T00:00:00Z"
-	},
-	{
-		name: "Good Friday",
-		localized_name: {
-			de: "Karfreitag"
-		},
-		date: "2017-04-14",
-		parsed_date: "2017-04-14T00:00:00Z"
-	}
+  {
+    "name": "New Year's Day",
+    "localized_name": {
+      "de": "Neujahrstag"
+    },
+    "date": "2017-01-01",
+    "parsed_date": "2017-01-01T00:00:00Z"
+  },
+  {
+    "name": "Good Friday",
+    "localized_name": {
+      "de": "Karfreitag"
+    },
+    "date": "2017-04-14",
+    "parsed_date": "2017-04-14T00:00:00Z"
+  }
 ]
 ```
 ## Contributions
@@ -96,8 +98,15 @@ If you are fluent in writing Go and know about holidays of a country not yet ava
             integrity="sha256-U5ZEeKfGNOja007MMD3YBI0A3OSZOQbeG6z2f2Y0hu8=" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/0.3.6/marked.min.js"
             integrity="sha256-mJAzKDq6kSoKqZKnA6UNLtPaIj8zT2mFnWu/GSouhgQ=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.9.0/highlight.min.js" 
+            integrity="sha256-KbfTjB0WZ8vvXngdpJGY3Yp3xKk+tttbqClO11anCIU=" crossorigin="anonymous"></script>
     <script>
-      $(function(){ $('#display').html(marked($('#display').html())); });
+      marked.setOptions({
+        highlight: function (code) { return hljs.highlightAuto(code).value },
+      });
+      $(function(){
+        $('#display').html(marked($('#display').html()));
+      });
     </script>
   </body>
 </html>
