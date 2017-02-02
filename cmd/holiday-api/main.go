@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	holidays "github.com/Luzifer/go-holidays"
@@ -38,6 +39,8 @@ func init() {
 
 func main() {
 	r := mux.NewRouter()
+	r.HandleFunc("/{country-code:[a-z-]+}/{year:[0-9]{4}}/{month:[0-9]{2}}/{day:[0-9]{2}}", handleHolidays)
+	r.HandleFunc("/{country-code:[a-z-]+}/{year:[0-9]{4}}/{month:[0-9]{2}}", handleHolidays)
 	r.HandleFunc("/{country-code:[a-z-]+}/{year:[0-9]{4}}", handleHolidays)
 	r.HandleFunc("/{country-code:[a-z-]+}", handleHolidays)
 	r.HandleFunc("/", handleReadme)
@@ -60,14 +63,23 @@ func handleHolidays(res http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	holidays, err := holidays.GetHolidays(countryCode, year)
+	check := strings.TrimRight(strings.Join([]string{strconv.Itoa(year), vars["month"], vars["day"]}, "-"), "-")
+
+	days, err := holidays.GetHolidays(countryCode, year)
 	if err != nil {
 		http.Error(res, "An error ocurred: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
+	outputSet := []holidays.Holiday{}
+	for _, h := range days {
+		if strings.HasPrefix(h.Date, check) {
+			outputSet = append(outputSet, h)
+		}
+	}
+
 	res.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(res).Encode(holidays)
+	json.NewEncoder(res).Encode(outputSet)
 }
 
 func handleReadme(res http.ResponseWriter, r *http.Request) {

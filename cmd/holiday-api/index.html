@@ -31,12 +31,17 @@ This instance of `holiday-api` is a convenient wrapper around my [go-holiday lib
 
 ## Usage
 
-The supported URL scheme is `/{country-code}/{year}` while `{year}` is optional and if not set the current year is used.
+The supported URL scheme is `/{country-code}/{year}/{month}/{day}`:
+- `{country-code}` **(required)** - ISO 3166-1 alpha-2 country code
+- `{year}` _(optional)_ - If not set the current year is used
+- `{month}` _(optional)_ - If specified list is filtered for given month
+- `{day}` _(optional)_ - If specified list is filtered for given day
 
 Examples:
 - [`/us`](/us) - Federal holidays for the United States for the current year
 - [`/de/2017`](/de/2017) - National holidays in Germany for 2017
 - [`/de-by/2017`](/de-by/2017) - Holidays for Bavaria for 2017 (Uses [ISO 3166-2:DE](https://en.wikipedia.org/wiki/ISO_3166-2:DE) codes)
+- [`/de-by/2017/10`](/de-by/2017/10) - Holidays for Bavaria for October 2017
 
 No request limits are enforced so please play nice with the API.
 
@@ -44,7 +49,7 @@ No request limits are enforced so please play nice with the API.
 
 The API will respond with
 - `HTTP 200` and a JSON array if the query was successful
-- `HTTP 404` if your URL is nvalid.
+- `HTTP 404` if your URL is invalid.
 - `HTTP 500` if the requested country-code is not included / supported
 
 ### JSON format
