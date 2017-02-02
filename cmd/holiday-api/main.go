@@ -1,5 +1,7 @@
 package main
 
+//go:generate go-bindata -pkg $GOPACKAGE -o assets.go index.html
+
 import (
 	"encoding/json"
 	"fmt"
@@ -38,6 +40,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/{country-code:[a-z-]+}/{year:[0-9]{4}}", handleHolidays)
 	r.HandleFunc("/{country-code:[a-z-]+}", handleHolidays)
+	r.HandleFunc("/", handleReadme)
 	http.ListenAndServe(cfg.Listen, r)
 }
 
@@ -65,4 +68,9 @@ func handleHolidays(res http.ResponseWriter, r *http.Request) {
 
 	res.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(res).Encode(holidays)
+}
+
+func handleReadme(res http.ResponseWriter, r *http.Request) {
+	readme, _ := Asset("index.html")
+	res.Write(readme)
 }

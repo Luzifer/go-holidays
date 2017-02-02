@@ -7,6 +7,8 @@ WORKDIR /go/src/github.com/Luzifer/go-holidays/cmd/holiday-api
 
 RUN set -ex \
  && apk add --update git ca-certificates \
+ && go get -u github.com/jteeuwen/go-bindata/... \
+ && go generate \
  && go install -ldflags "-X main.version=$(git describe --tags || git rev-parse --short HEAD || echo dev)" \
  && apk del --purge git
 
