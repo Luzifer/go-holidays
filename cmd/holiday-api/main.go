@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	holidays "github.com/Luzifer/go-holidays"
+	"github.com/Luzifer/go-holidays/holidays"
 	"github.com/Luzifer/rconfig"
 	"github.com/gorilla/mux"
 )
