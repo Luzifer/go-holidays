@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/Luzifer/go-holidays/holidays"
-	"github.com/Luzifer/rconfig"
+	"github.com/Luzifer/rconfig/v2"
 	"github.com/gorilla/mux"
 )
 
