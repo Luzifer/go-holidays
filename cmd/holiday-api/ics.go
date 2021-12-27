@@ -42,6 +42,7 @@ func (i iCalendarEvent) String() string {
 		strings.Join([]string{"DTSTART;VALUE=DATE", i.Date.Format("20060102")}, ":"),
 		strings.Join([]string{"UID", i.UID}, ":"),
 		"DURATION:P1D",
+		"TRANSP:TRANSPARENT",
 		"END:VEVENT",
 	}, "\r\n")
 }
