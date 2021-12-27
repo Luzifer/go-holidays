@@ -1,3 +1,8 @@
+# 0.3.0 / 2021-12-27
+
+  * Allow to query localized name
+  * Add ICS support and switch to go embeds
+
 # 0.2.0 / 2021-02-19
 
   * Update Dockerfile for readonly modues
