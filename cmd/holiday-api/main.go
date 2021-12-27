@@ -1,11 +1,9 @@
 package main
 
-//go:generate go-bindata -pkg $GOPACKAGE -o assets.go index.html
-
 import (
+	_ "embed"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -14,7 +12,9 @@ import (
 
 	"github.com/Luzifer/go-holidays/holidays"
 	"github.com/Luzifer/rconfig/v2"
+
 	"github.com/gorilla/mux"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -22,6 +22,9 @@ var (
 		Listen         string `flag:"listen" default:":3000" description:"IP/Port to listen on"`
 		VersionAndExit bool   `flag:"version" default:"false" description:"Prints current version and exits"`
 	}{}
+
+	//go:embed index.html
+	indexHTML []byte
 
 	version = "dev"
 )
@@ -39,10 +42,12 @@ func init() {
 
 func main() {
 	r := mux.NewRouter()
-	r.HandleFunc("/{country-code:[a-z-]+}/{year:[0-9]{4}}/{month:[0-9]{2}}/{day:[0-9]{2}}", handleHolidays)
-	r.HandleFunc("/{country-code:[a-z-]+}/{year:[0-9]{4}}/{month:[0-9]{2}}", handleHolidays)
-	r.HandleFunc("/{country-code:[a-z-]+}/{year:[0-9]{4}}", handleHolidays)
-	r.HandleFunc("/{country-code:[a-z-]+}", handleHolidays)
+	parts := []string{"", "{country-code:[a-z-]+}", "{year:[0-9]{4}}", "{month:[0-9]{2}}", "{day:[0-9]{2}}"}
+	for i := 2; i <= len(parts); i++ {
+		p := strings.Join(parts[:i], "/")
+		r.HandleFunc(p, handleHolidays)
+		r.HandleFunc(strings.Join([]string{p, "{format:[a-z]+}"}, "."), handleHolidays)
+	}
 	r.HandleFunc("/", handleReadme)
 
 	srv := &http.Server{
@@ -59,8 +64,13 @@ func handleHolidays(res http.ResponseWriter, r *http.Request) {
 
 	var (
 		countryCode = vars["country-code"]
+		format      = vars["format"]
 		year        = time.Now().Year()
 	)
+
+	if format == "" {
+		format = "json"
+	}
 
 	if y, ok := vars["year"]; ok {
 		var err error
@@ -85,11 +95,30 @@ func handleHolidays(res http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	res.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(res).Encode(outputSet)
+	switch format {
+	case "ics":
+		cal := iCalendar{}
+		for _, h := range outputSet {
+			cal.Events = append(cal.Events, iCalendarEvent{
+				Summary: h.Name,
+				Date:    h.ParsedDate,
+				UID:     fmt.Sprintf("%s_%s@hoiday-api.fyi", countryCode, h.ParsedDate.Format("20060102")),
+			})
+		}
+
+		res.Header().Set("Content-Type", "text/calendar")
+		fmt.Fprintln(res, cal.String())
+
+	case "json":
+		res.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(res).Encode(outputSet)
+
+	default:
+		http.Error(res, fmt.Sprintf("Unknown format: %s", format), http.StatusBadRequest)
+		return
+	}
 }
 
 func handleReadme(res http.ResponseWriter, r *http.Request) {
-	readme, _ := Asset("index.html")
-	res.Write(readme)
+	res.Write(indexHTML)
 }
