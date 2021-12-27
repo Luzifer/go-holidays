@@ -65,6 +65,7 @@ func handleHolidays(res http.ResponseWriter, r *http.Request) {
 	var (
 		countryCode = vars["country-code"]
 		format      = vars["format"]
+		locale      = r.FormValue("locale")
 		year        = time.Now().Year()
 	)
 
@@ -99,8 +100,13 @@ func handleHolidays(res http.ResponseWriter, r *http.Request) {
 	case "ics":
 		cal := iCalendar{}
 		for _, h := range outputSet {
+			name := h.Name
+			if h.LocalizedName != nil && h.LocalizedName[locale] != "" {
+				name = h.LocalizedName[locale]
+			}
+
 			cal.Events = append(cal.Events, iCalendarEvent{
-				Summary: h.Name,
+				Summary: name,
 				Date:    h.ParsedDate,
 				UID:     fmt.Sprintf("%s_%s@hoiday-api.fyi", countryCode, h.ParsedDate.Format("20060102")),
 			})
