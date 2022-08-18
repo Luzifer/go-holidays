@@ -1,3 +1,7 @@
+# 0.4.0 / 2022-08-18
+
+  * Restructure german holidays, fix missing days
+
 # 0.3.0 / 2021-12-27
 
   * Allow to query localized name
